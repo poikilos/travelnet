@@ -64,7 +64,7 @@
           - removed nodes that are not intended for manual use from creative inventory
           - improved naming of station levels for the elevator
  21.06.13 - elevator stations are sorted by height instead of date of creation as is the case with travelnet boxes
-          - elevator stations are named automaticly
+          - elevator stations are named automatically
  20.06.13 - doors can be opened and closed from inside the travelnet box/elevator
           - the elevator can only move vertically; the network name is defined by its x and z coordinate
  13.06.13 - bugfix
@@ -78,7 +78,7 @@
           - beam effect is disabled by default
  20.03.13 - added inventory image provided by VanessaE
           - fixed bug that made it impossible to remove stations from the net
-          - if the station a player beamed to no longer exists, the station will be removed automaticly
+          - if the station a player beamed to no longer exists, the station will be removed automatically
           - with the travelnet_attach priv, you can now attach your box to the nets of other players
           - in newer versions of Minetest, the players yaw is set so that he/she looks out of the receiving box
           - target list is now centered if there are less than 9 targets
@@ -100,8 +100,8 @@ local S = dofile(travelnet.path .. "/intllib.lua")
 travelnet.S = S
 
 
-minetest.register_privilege("travelnet_attach", { description = S("allows to attach travelnet boxes to travelnets of other players"), give_to_singleplayer = false});
-minetest.register_privilege("travelnet_remove", { description = S("allows to dig travelnet boxes which belog to nets of other players"), give_to_singleplayer = false});
+minetest.register_privilege("travelnet_attach", { description = S("allows attaching travelnet boxes to travelnets of other players"), give_to_singleplayer = false});
+minetest.register_privilege("travelnet_remove", { description = S("allows breaking travelnet boxes which belong to networks of other players"), give_to_singleplayer = false});
 
 -- read the configuration
 dofile(travelnet.path.."/config.lua"); -- the normal, default travelnet
@@ -126,7 +126,7 @@ travelnet.restore_data = function()
 
    local file = io.open( travelnet.mod_data_path, "r" );
    if( not file ) then
-      print(S("[Mod travelnet] Error: Savefile '%s' not found.")
+      print(S("[Mod travelnet] Error: Savefile '%s' was not found.")
          :format(travelnet.mod_data_path));
       return;
    end
@@ -244,7 +244,7 @@ travelnet.reset_formspec = function( meta )
 		"button_exit[8.0,0.0;2.2,0.7;station_dig;"..S("Remove station").."]"..
 		"field[0.3,1.2;9,0.9;station_name;"..S("Name of this station")..":;"..
 			minetest.formspec_escape(station_name or "").."]"..
-		"label[0.3,1.5;"..S("How do you call this place here? Example: \"my first house\", \"mine\", \"shop\"...").."]"..
+		"label[0.3,1.5;"..S("Name of this location (Example: \"my first house\", \"mine\", \"shop\"):").."]"..
 
 		"field[0.3,2.8;9,0.9;station_network;"..S("Assign to Network:")..";"..
 			minetest.formspec_escape(station_network or "").."]"..
@@ -292,7 +292,7 @@ travelnet.update_formspec = function( pos, puncher_name, fields )
 
 
       travelnet.reset_formspec( meta );
-      travelnet.show_message( pos, puncher_name, "Error", S("Update failed! Resetting this box on the travelnet."));
+      travelnet.show_message( pos, puncher_name, "Error", S("Update failed! Resetting...."));
       return;
    end
 
@@ -490,7 +490,7 @@ travelnet.update_formspec = function( pos, puncher_name, fields )
    meta:set_string( "infotext", S("Station '%s'"):format(tostring( station_name )).." "..
 				S("on travelnet '%s'"):format(tostring( station_network )).." "..
                                 S("(owned by %s)"):format(tostring( owner_name )).." "..
-				S("ready for usage. Right-click to travel, punch to update."));
+				S("is ready. Right-click to travel, punch to update."));
 
    -- show the player the updated formspec
    travelnet.show_current_formspec( pos, meta, puncher_name );
@@ -521,7 +521,7 @@ travelnet.add_target = function( station_name, network_name, pos, player_name, m
 
    if( network_name == "" or not( network_name )) then
       travelnet.show_message( pos, player_name, S("Error"),
-	S("Please provide the name of the network this station ought to be connected to."));
+	S("Please provide a new or existing network to which this station should connect."));
       return;
    end
 
@@ -534,15 +534,15 @@ travelnet.add_target = function( station_name, network_name, pos, player_name, m
    elseif( not( minetest.check_player_privs(player_name, {interact=true}))) then
 
       travelnet.show_message( pos, player_name, S("Error"),
-	S("There is no player with interact privilege named '%s'. Aborting."):format(tostring( player_name )));
+	S("Access has been denied. There is no player with interact privilege named '%s'."):format(tostring( player_name )));
       return;
 
    elseif( not( minetest.check_player_privs(player_name, {travelnet_attach=true}))
        and not( travelnet.allow_attach( player_name, owner_name, network_name ))) then
 
       travelnet.show_message( pos, player_name, S("Error"),
-	S("You do not have the travelnet_attach priv which is required to attach your box to "..
-	"the network of someone else. Aborting."));
+	S("Access has been denied. You do not have the travelnet_attach priv which is required to attach your box to "..
+	"the network of someone else."));
       return;
    end
 
@@ -562,7 +562,7 @@ travelnet.add_target = function( station_name, network_name, pos, player_name, m
 
       if( k == station_name ) then
          travelnet.show_message( pos, player_name, S("Error"),
-	    S("A station named '%s' already exists on this network. Please choose a diffrent name!"):format(station_name));
+	    S("A station named '%s' already exists on this network. Please choose a different name!"):format(station_name));
          return;
       end
 
@@ -574,7 +574,7 @@ travelnet.add_target = function( station_name, network_name, pos, player_name, m
       travelnet.show_message( pos, player_name, S("Error"),
 	S("Network '%s',"):format(network_name).." "..
 	S("already contains the maximum number (=%s) of allowed stations per network. "..
-	"Please choose a diffrent/new network name."):format(travelnet.MAX_STATIONS_PER_NETWORK));
+	"Please choose a different/new network name."):format(travelnet.MAX_STATIONS_PER_NETWORK));
       return;
    end
 
@@ -752,7 +752,7 @@ travelnet.on_receive_fields = function(pos, formname, fields, player)
    end
 
    if( not( fields.target )) then
-      minetest.chat_send_player(name, S("Please click on the target you want to travel to."));
+      minetest.chat_send_player(name, S("Choose a destination."));
       return;
    end
 
@@ -912,7 +912,7 @@ travelnet.remove_box = function( pos, oldnode, oldmetadata, digger )
 
    if( not( oldmetadata ) or oldmetadata=="nil" or not(oldmetadata.fields)) then
       minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
-		S("Could not find information about the station that is to be removed."));
+		S("Travelnet could not find information about the station that is to be removed."));
       return;
    end
 
@@ -928,7 +928,7 @@ travelnet.remove_box = function( pos, oldnode, oldmetadata, digger )
      or not( travelnet.targets[ owner_name ][ station_network ] )) then
 
       minetest.chat_send_player( digger:get_player_name(), S("Error")..": "..
-		S("Could not find the station that is to be removed."));
+		S("Travelnet could not find the station that is to be removed."));
       return;
    end
 
@@ -979,7 +979,7 @@ travelnet.can_dig_old = function( pos, player, description )
    end
 
    if( not( meta ) or not( owner) or owner=='') then
-      minetest.chat_send_player(name, S("This %s has not been configured yet. Please set it up first to claim it. Afterwards you can remove it because you are then the owner."):format(description));
+      minetest.chat_send_player(name, S("This %s has not been configured yet. Please set it up first to claim it. You can only remove stations you own."):format(description));
       return false;
 
    elseif( owner ~= name ) then
@@ -1033,7 +1033,7 @@ if( travelnet.enable_elevator ) then
    dofile(travelnet.path.."/elevator.lua");  -- allows up/down transfers only
 end
 if( travelnet.enable_doors ) then
-   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automaticly when the travelnet or elevator is used
+   dofile(travelnet.path.."/doors.lua");     -- doors that open and close automatically when the travelnet or elevator is used
 end
 
 if( travelnet.enable_abm ) then
