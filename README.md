@@ -1,6 +1,6 @@
 # TravelNet
 
-How this works: 
+How this works:
 
 - craft it by filling the right and left row with glass; place in the middle row (from top to bottom): steel, mese, steel
 - place the travelnet box somewhere
@@ -16,5 +16,5 @@ LICENSE
 The mod was written by me, Sokomine, and includes small contributions from other contributors.
 License: GPLv3 (see file LICENSE)
 
-The models and textures as found in the textures/ and models/ folders where created by VanessaE
+The models and textures as found in the textures/ and models/ folders where created by VanessaE, modified by Poikilos,
 and are provided under the CC0 license.
